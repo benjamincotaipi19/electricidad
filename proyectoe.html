@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Eléctrica</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #f1f1f1;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+        }
+        .tab-button.active {
+            background-color: #2c3e50;
+            color: white;
+        }
+        .tab-content {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+        select, input {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #1a252f;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #f1f1f1;
+            margin-top: 20px;
+        }
+        .result-box {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            border-left: 4px solid #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Calculadora de Fórmulas Eléctricas</h1>
+    </header>
+    
+    <main>
+        <section class="calculator-section">
+            <h2>Seleccione el tipo de cálculo</h2>
+            
+            <div class="tabs">
+                <button class="tab-button active" onclick="openTab('domestica')">Electricidad Domiciliaria</button>
+                <button class="tab-button" onclick="openTab('industrial')">Electricidad Industrial</button>
+            </div>
+            
+            <!-- Sección Electricidad Domiciliaria -->
+            <div id="domestica" class="tab-content">
+                <h3>Electricidad Domiciliaria</h3>
+                <select id="formula-domestica" onchange="updateDomesticForm()">
+                    <option value="">Seleccione una fórmula</option>
+                    <option value="potencia">Potencia (P = V × I)</option>
+                    <option value="ley-ohm">Ley de Ohm (V = I × R)</option>
+                    <option value="energia">Consumo de energía (E = P × t)</option>
+                    <option value="caida-tension">Caída de tensión (ΔV = I × R)</option>
+                </select>
+                
+                <div id="domestic-form-container"></div>
+                
+                <button onclick="calculateDomestic()">Calcular</button>
+                
+                <div id="domestic-result"></div>
+            </div>
+            
+            <!-- Sección Electricidad Industrial -->
+            <div id="industrial" class="tab-content" style="display:none">
+                <h3>Electricidad Industrial</h3>
+                <select id="formula-industrial" onchange="updateIndustrialForm()">
+                    <option value="">Seleccione una fórmula</option>
+                    <option value="potencia-trifasica">Potencia trifásica (P = √3 × V × I × cosφ)</option>
+                    <option value="corriente-trifasica">Corriente trifásica (I = P / (√3 × V × cosφ))</option>
+                    <option value="factor-potencia">Factor de potencia (cosφ = P / (√3 × V × I))</option>
+                    <option value="motor-hp">Conversión HP a kW (kW = HP × 0.746)</option>
+                </select>
+                
+                <div id="industrial-form-container"></div>
+                
+                <button onclick="calculateIndustrial()">Calcular</button>
+                
+                <div id="industrial-result"></div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2023 Calculadora Eléctrica</p>
+    </footer>
+    
+    <script>
+        // Funciones para cambiar entre pestañas
+        function openTab(tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].style.display = "none";
+            }
+            
+            const tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).style.display = "block";
+            event.currentTarget.classList.add("active");
+        }
+
+        // Funciones para electricidad domiciliaria
+        function updateDomesticForm() {
+            const formula = document.getElementById("formula-domestica").value;
+            const container = document.getElementById("domestic-form-container");
+            container.innerHTML = "";
+            
+            switch(formula) {
+                case "potencia":
+                    container.innerHTML = `
+                        <label for="voltaje">Voltaje (V) en voltios:</label>
+                        <input type="number" id="voltaje" step="0.01">
+                        
+                        <label for="corriente">Corriente (I) en amperios:</label>
+                        <input type="number" id="corriente" step="0.01">
+                    `;
+                    break;
+                    
+                case "ley-ohm":
+                    container.innerHTML = `
+                        <label for="corriente-ohm">Corriente (I) en amperios:</label>
+                        <input type="number" id="corriente-ohm" step="0.01">
+                        
+                        <label for="resistencia">Resistencia (R) en ohmios:</label>
+                        <input type="number" id="resistencia" step="0.01">
+                    `;
+                    break;
+                    
+                case "energia":
+                    container.innerHTML = `
+                        <label for="potencia-energia">Potencia (P) en vatios:</label>
+                        <input type="number" id="potencia-energia" step="0.01">
+                        
+                        <label for="tiempo">Tiempo (t) en horas:</label>
+                        <input type="number" id="tiempo" step="0.01">
+                    `;
+                    break;
+                    
+                case "caida-tension":
+                    container.innerHTML = `
+                        <label for="corriente-caida">Corriente (I) en amperios:</label>
+                        <input type="number" id="corriente-caida" step="0.01">
+                        
+                        <label for="resistencia-caida">Resistencia (R) en ohmios:</label>
+                        <input type="number" id="resistencia-caida" step="0.01">
+                    `;
+                    break;
+            }
+        }
+
+        function calculateDomestic() {
+            const formula = document.getElementById("formula-domestica").value;
+            const resultDiv = document.getElementById("domestic-result");
+            let result = 0;
+            let formulaText = "";
+            
+            switch(formula) {
+                case "potencia":
+                    const voltaje = parseFloat(document.getElementById("voltaje").value);
+                    const corriente = parseFloat(document.getElementById("corriente").value);
+                    if(isNaN(voltaje) || isNaN(corriente)) {
+                        formulaText = "Por favor ingrese valores válidos";
+                        break;
+                    }
+                    result = voltaje * corriente;
+                    formulaText = `P = V × I = ${voltaje}V × ${corriente}A = ${result.toFixed(2)}W`;
+                    break;
+                    
+                case "ley-ohm":
+                    const corrienteOhm = parseFloat(document.getElementById("corriente-ohm").value);
+                    const resistencia = parseFloat(document.getElementById("resistencia").value);
+                    if(isNaN(corrienteOhm) || isNaN(resistencia)) {
+                        formulaText = "Por favor ingrese valores válidos";
+                        break;
+                    }
+                    result = corrienteOhm * resistencia;
+                    formulaText = `V = I × R = ${corrienteOhm}A × ${resistencia}Ω = ${result.toFixed(2)}V`;
+                    break;
+                    
+                case "energia":
+                    const potencia = parseFloat(document.getElementById("potencia-energia").value);
+                    const tiempo = parseFloat(document.getElementById("tiempo").value);
+                    if(isNaN(potencia) || isNaN(tiempo)) {
+                        formulaText = "Por favor ingrese valores válidos";
+                        break;
+                    }
+                    result = potencia * tiempo;
+                    formulaText = `E = P × t = ${potencia}W × ${tiempo}h = ${result.toFixed(2)}Wh`;
+                    break;
+                    
+                case "caida-tension":
+                    const corrienteCaida = parseFloat(document.getElementById("corriente-caida").value);
+                    const resistenciaCaida = parseFloat(document.getElementById("resistencia-caida").value);
+                    if(isNaN(corrienteCaida) || isNaN(resistenciaCaida)) {
+                        formulaText = "Por favor ingrese valores válidos";
+                        break;
+                    }
+                    result = corrienteCaida * resistenciaCaida;
+                    formulaText = `ΔV = I × R = ${corrienteCaida}A × ${resistenciaCaida}Ω = ${result.toFixed(2)}V`;
+                    break;
+                    
+                default:
+                    formulaText = "Por favor seleccione una fórmula válida";
+            }
+            
+            resultDiv.innerHTML = `<div class="result-box"><h4>Resultado:</h4><p>${formulaText}</p></div>`;
+        }
+
+        // Funciones para electricidad industrial
+        function updateIndustrialForm() {
+            const formula = document.getElementById("formula-industrial").value;
+            const container = document.getElementById("industrial-form-container");
+            container.innerHTML = "";
+            
+            switch(formula) {
+                case "potencia-trifasica":
+                    container.innerHTML = `
+                        <label for="voltaje-trifasico">Voltaje línea-línea (V) en voltios:</label>
+                        <input type="number" id="voltaje-trifasico" step="0.01">
+                        
+                        <label for="corriente-trifasica">Corriente (I) en amperios:</label>
+                        <input type="number" id="corriente-trifasica" step="0.01">
+                        
+                        <label for="factor-potencia-trif">Factor de potencia (cosφ):</label>
+                        <input type="number" id="factor-potencia-trif" step="0.01" min="0" max="1" value="0.8">
+                    `;
+                    break;
+                    
+                case "corriente-trifasica":
+                    container.innerHTML = `
+                        <label for="potencia-trifasica">Potencia (P) en vatios:</label>
+                        <input type="number" id="potencia-trifasica" step="0.01">
+                        
+                        <label for="voltaje-trifasico-corriente">Voltaje línea-línea (V) en voltios:</label>
+                        <input type="number" id="voltaje-trifasico-corriente" step="0.01">
+                        
+                        <label for="factor-potencia-corriente">Factor de potencia (cosφ):</label>
+                        <input type="number" id="factor-potencia-corriente" step="0.01" min="0" max="1" value="0.8">
+                    `;
+                    break;
+                    
+                case "factor-potencia":
+                    container.innerHTML = `
+                        <label for="potencia-aparente">Potencia activa (P) en vatios:</label>
+                        <input type="number" id="potencia-aparente" step="0.01">
+                        
+                        <label for="voltaje-fp">Voltaje línea-línea (V) en voltios:</label>
+                        <input type="number" id="voltaje-fp" step="0.01">
+                        
+                        <label for="corriente-fp">Corriente (I) en amperios:</label>
+                        <input type="number" id="corriente-fp" step="0.01">
+                    `;
+                    break;
+                    
+                case "motor-hp":
+                    container.innerHTML = `
+                        <label for="hp">Caballos de fuerza (HP):</label>
+                        <input type="number" id="hp" step="0.01">
+                    `;
+                    break;
+            }
+        }
+
+        function calculateIndustrial() {
+            const formula = document.getElementById("formula-industrial").value;
+            const resultDiv = document.getElementById("industrial-result");
+            let result = 0;
+            let formulaText = "";
+            const raizDe3 = Math.sqrt(3);
+            
+            switch(formula) {
+                case "potencia-trifasica":
+                    const voltajeTrifasico = parseFloat(document.getElementById("voltaje-trifasico").value);
+                    const corrienteTrifasica = parseFloat(document.getElementById("corriente-trifasica").value);
+                    const factorPotenciaTrif = parseFloat(document.getElementById("factor-potencia-trif").value);
+                    if(isNaN(voltajeTrifasico) || isNaN(corrienteTrifasica) || isNaN(factorPotenciaTrif)) {
+                        formulaText = "Por favor ingrese valores válidos";
+                        break;
+                    }
+                    result = raizDe3 * voltajeTrifasico * corrienteTrifasica * factorPotenciaTrif;
+                    formulaText = `P = √3 × V × I × cosφ = ${raizDe3.toFixed(4)} × ${voltajeTrifasico}V × ${corrienteTrifasica}A × ${factorPotenciaTrif} = ${result.toFixed(2)}W`;
+                    break;
+                    
+                case "corriente-trifasica":
+                    const potenciaTrifasica = parseFloat(document.getElementById("potencia-trifasica").value);
+                    const voltajeTrifasicoCorriente = parseFloat(document.getElementById("voltaje-trifasico-corriente").value);
+                    const factorPotenciaCorriente = parseFloat(document.getElementById("factor-potencia-corriente").value);
+                    if(isNaN(potenciaTrifasica) || isNaN(voltajeTrifasicoCorriente) || isNaN(factorPotenciaCorriente)) {
+                        formulaText = "Por favor ingrese valores válidos";
+                        break;
+                    }
+                    result = potenciaTrifasica / (raizDe3 * voltajeTrifasicoCorriente * factorPotenciaCorriente);
+                    formulaText = `I = P / (√3 × V × cosφ) = ${potenciaTrifasica}W / (${raizDe3.toFixed(4)} × ${voltajeTrifasicoCorriente}V × ${factorPotenciaCorriente}) = ${result.toFixed(2)}A`;
+                    break;
+                    
+                case "factor-potencia":
+                    const potenciaAparente = parseFloat(document.getElementById("potencia-aparente").value);
+                    const voltajeFp = parseFloat(document.getElementById("voltaje-fp").value);
+                    const corrienteFp = parseFloat(document.getElementById("corriente-fp").value);
+                    if(isNaN(potenciaAparente) || isNaN(voltajeFp) || isNaN(corrienteFp)) {
+                        formulaText = "Por favor ingrese valores válidos";
+                        break;
+                    }
+                    result = potenciaAparente / (raizDe3 * voltajeFp * corrienteFp);
+                    formulaText = `cosφ = P / (√3 × V × I) = ${potenciaAparente}W / (${raizDe3.toFixed(4)} × ${voltajeFp}V × ${corrienteFp}A) = ${result.toFixed(4)}`;
+                    break;
+                    
+                case "motor-hp":
+                    const hp = parseFloat(document.getElementById("hp").value);
+                    if(isNaN(hp)) {
+                        formulaText = "Por favor ingrese un valor válido";
+                        break;
+                    }
+                    result = hp * 0.746;
+                    formulaText = `kW = HP × 0.746 = ${hp}HP × 0.746 = ${result.toFixed(3)}kW`;
+                    break;
+                    
+                default:
+                    formulaText = "Por favor seleccione una fórmula válida";
+            }
+            
+            resultDiv.innerHTML = `<div class="result-box"><h4>Resultado:</h4><p>${formulaText}</p></div>`;
+        }
+    </script>
+</body>
+</html>
